@@ -1,0 +1,30 @@
+Visual Style:
+
+Clean, modern design with rounded corners (rounded-lg, rounded-xl)
+Green primary color (#16a34a) with blue secondary (#2563eb)
+White content cards with subtle shadows (shadow-lg)
+Gray backgrounds (bg-gray-50, bg-gray-100)
+
+Layout Pattern:
+
+Container with max-width and padding (container mx-auto px-4 max-w-7xl)
+White rounded cards for content sections
+Responsive grid layouts (grid-cols-1 lg:grid-cols-2)
+Consistent spacing with space-y-4/6/8
+
+Components:
+
+Vietnamese text labels and content
+FontAwesome icons throughout
+Hover effects with transitions (hover:bg-green-700 transition-colors)
+Form inputs with focus states (focus:ring-2 focus:ring-green-500)
+Buttons with shadows and hover animations
+
+Interactive Elements:
+
+Star ratings, quantity controls, image galleries
+Success alerts with auto-hide
+Smooth transitions and hover states
+
+Use this consistent styling and Vietnamese localization for all similar pages. 🎨
+using tailwind
