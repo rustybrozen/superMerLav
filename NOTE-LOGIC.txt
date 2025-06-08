@@ -1,0 +1,745 @@
+i have these code:
+controller:
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
+
+class CheckoutController extends Controller
+{
+  
+    public function validateStock(Request $request)
+    {
+         Log::info('validateStock called');
+        try {
+            $cart = $this->getCurrentCart();
+       
+            
+            
+            if (!$cart || $cart->items->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Giỏ hàng trống!'
+                ]);
+            }
+
+            $stockIssues = [];
+            $cartUpdated = false;
+            
+            foreach ($cart->items as $item) {
+                $product = Product::find($item->product_id);
+                
+              
+                if (!$product) {
+                    $item->delete();
+                    $stockIssues[] = "Sản phẩm '{$item->product->name}' không còn tồn tại và đã được xóa khỏi giỏ hàng.";
+                    $cartUpdated = true;
+                    continue;
+                }
+                
+                
+                if (!$product->is_active) {
+                    $item->delete();
+                    $stockIssues[] = "Sản phẩm '{$product->name}' hiện không có sẵn và đã được xóa khỏi giỏ hàng.";
+                    $cartUpdated = true;
+                    continue;
+                }
+                
+             
+                if ($product->stock < $item->quantity) {
+                    if ($product->stock > 0) {
+                      
+                        $item->update(['quantity' => $product->stock]);
+                        $stockIssues[] = "Sản phẩm '{$product->name}' chỉ còn {$product->stock} sản phẩm. Số lượng đã được cập nhật.";
+                        $cartUpdated = true;
+                    } else {
+           
+                        $item->delete();
+                        $stockIssues[] = "Sản phẩm '{$product->name}' đã hết hàng và được xóa khỏi giỏ hàng.";
+                        $cartUpdated = true;
+                    }
+                }
+            }
+            
+           
+            if ($cartUpdated) {
+                $this->updateCartTotals($cart);
+            }
+            
+            if (!empty($stockIssues)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => implode(' ', $stockIssues),
+                    'cart_updated' => $cartUpdated
+                ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Tất cả sản phẩm đều có sẵn!'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Stock validation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi kiểm tra tồn kho!'
+            ]);
+        }
+    }
+    
+    /**
+     * Xử lý thanh toán và tạo đơn hàng
+     */
+    public function processCheckout(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            
+            // 1. Lấy giỏ hàng hiện tại
+            $cart = $this->getCurrentCart();
+            
+            if (!$cart || $cart->items->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Giỏ hàng trống!'
+                ]);
+            }
+            
+            // 2. Validate một lần nữa trước khi tạo đơn hàng
+            $stockValidation = $this->validateStockInternal($cart);
+            if (!$stockValidation['valid']) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => $stockValidation['message']
+                ]);
+            }
+            
+            // 3. Tạo đơn hàng
+            $order = $this->createOrder($request, $cart);
+            
+            // 4. Tạo chi tiết đơn hàng và cập nhật tồn kho
+            $this->createOrderDetails($order, $cart);
+            
+            // 5. Xóa giỏ hàng
+            $this->clearCart($cart);
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Đặt hàng thành công!',
+                'order_id' => $order->id,
+                'order_number' => $order->order_number
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Checkout process error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra trong quá trình đặt hàng!'
+            ]);
+        }
+    }
+    
+    /**
+     * Hiển thị trang thành công
+     */
+    public function success($orderId)
+    {
+        $order = Order::with('orderDetails.product')->findOrFail($orderId);
+        
+        // Kiểm tra quyền truy cập
+        if (auth()->check()) {
+            if ($order->user_id !== auth()->id()) {
+                abort(403, 'Không có quyền truy cập đơn hàng này.');
+            }
+        } else {
+            // Guest user - kiểm tra session
+            if ($order->user_id !== null) {
+                abort(403, 'Không có quyền truy cập đơn hàng này.');
+            }
+        }
+        
+        return view('account.checkout-success', compact('order'));
+    }
+    
+    /**
+     * Tạo đơn hàng mới
+     */
+    private function createOrder(Request $request, Cart $cart)
+    {
+        $customerInfo = $request->input('customer_info');
+        $paymentMethod = $request->input('payment_method');
+        
+        // Generate order number
+        $orderNumber = $this->generateOrderNumber();
+        
+        $orderData = [
+            'order_date' => now(),
+            'subtotal' => $cart->total,
+            'discount_amount' => 0,
+            'shipping_fee' => 0,
+            'total_price' => $cart->total,
+            'payment_method' => $paymentMethod,
+            'payment_status' => $paymentMethod === 'cod' ? 'pending' : 'processing',
+            'order_status' => 'pending',
+            'tracking_number' => $orderNumber,
+        ];
+        
+        if (auth()->check()) {
+            // User đã đăng nhập
+            $user = auth()->user();
+            $orderData = array_merge($orderData, [
+                'user_id' => $user->id,
+                'shipping_address' => $user->address,
+                'shipping_city' => $user->city ?? 'TP. Hồ Chí Minh',
+                'shipping_province' => $user->province ?? 'TP. Hồ Chí Minh',
+            ]);
+        } else {
+            // Guest user
+            $orderData = array_merge($orderData, [
+                'user_id' => null,
+                'guest_name' => $customerInfo['fullname'],
+                'guest_email' => $customerInfo['email'],
+                'guest_phone' => $customerInfo['phone'],
+                'shipping_address' => $customerInfo['address'],
+                'shipping_city' => 'TP. Hồ Chí Minh',
+                'shipping_province' => 'TP. Hồ Chí Minh',
+            ]);
+        }
+        
+        return Order::create($orderData);
+    }
+    
+    /**
+     * Tạo chi tiết đơn hàng
+     */
+    private function createOrderDetails(Order $order, Cart $cart)
+    {
+        foreach ($cart->items as $item) {
+            // Tạo order detail
+            OrderDetail::create([
+                'order_id' => $order->id,
+                'product_id' => $item->product_id,
+                'product_name' => $item->product->name,
+                'price_at_purchase' => $item->price_at_add,
+                'quantity' => $item->quantity,
+            ]);
+            
+            // Cập nhật tồn kho
+            $product = Product::find($item->product_id);
+            if ($product) {
+                $product->decrement('stock', $item->quantity);
+            }
+        }
+    }
+    
+    /**
+     * Generate unique order number
+     */
+    private function generateOrderNumber()
+    {
+        do {
+            // Format: ORD + YYYYMMDD + 4 số random
+            $orderNumber = 'ORD' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        } while (Order::where('tracking_number', $orderNumber)->exists());
+        
+        return $orderNumber;
+    }
+    
+    /**
+     * Validate stock internal
+     */
+    private function validateStockInternal(Cart $cart)
+    {
+        foreach ($cart->items as $item) {
+            $product = Product::find($item->product_id);
+            
+            if (!$product || !$product->is_active) {
+                return [
+                    'valid' => false,
+                    'message' => "Sản phẩm '{$item->product->name}' không còn có sẵn!"
+                ];
+            }
+            
+            if ($product->stock < $item->quantity) {
+                return [
+                    'valid' => false,
+                    'message' => "Sản phẩm '{$product->name}' không đủ số lượng trong kho!"
+                ];
+            }
+        }
+        
+        return ['valid' => true];
+    }
+    
+    /**
+     * Lấy giỏ hàng hiện tại
+     */
+    private function getCurrentCart()
+    {
+        if (auth()->check()) {
+            return Cart::with('items.product')->where('user_id', auth()->id())->first();
+        } else {
+            $sessionId = session()->getId();
+            return Cart::with('items.product')->where('session_id', $sessionId)->first();
+        }
+    }
+    
+    /**
+     * Cập nhật tổng giỏ hàng
+     */
+    private function updateCartTotals(Cart $cart)
+    {
+        $total = $cart->items->sum(function ($item) {
+            return $item->quantity * $item->price_at_add;
+        });
+        
+        $totalItems = $cart->items->sum('quantity');
+        
+        $cart->update([
+            'total' => $total,
+            'total_items' => $totalItems
+        ]);
+    }
+    
+    /**
+     * Xóa giỏ hàng sau khi đặt hàng thành công
+     */
+    private function clearCart(Cart $cart)
+    {
+        $cart->items()->delete();
+        $cart->delete();
+    }
+}
+
+
+model:
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Product extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'name', 'short_desc', 'long_desc', 'price', 
+        'quantity', 'category_id', 'image', 'in_price', 'is_active'
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'deleted_at' => 'datetime',
+    ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+    public function getPriceFormattedAttribute()
+{
+    return number_format($this->price) . ' VND';
+}
+}
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class OrderDetail extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'order_id', 'product_id', 'product_name', 
+        'price_at_purchase', 'quantity'
+    ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+}
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Order extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id', 
+        'guest_name', 'guest_email', 'guest_phone',
+        'shipping_address', 'shipping_city', 'shipping_province', 
+        'shipping_postal_code', 'shipping_notes',
+        'order_date', 'subtotal', 'discount_amount', 'shipping_fee', 'total_price',
+        'payment_method', 'payment_status', 'order_status',
+        'tracking_number', 'shipped_at', 'delivered_at',
+        'voucher_code'
+    ];
+
+    protected $casts = [
+        'order_date' => 'datetime',
+        'shipped_at' => 'datetime',
+        'delivered_at' => 'datetime',
+    ];
+
+    // Relationships
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
+
+    public function review()
+    {
+        return $this->hasOne(ProductReview::class);
+    }
+
+    // Helper methods
+    public function isGuestOrder()
+    {
+        return is_null($this->user_id);
+    }
+
+    public function getCustomerName()
+    {
+        return $this->isGuestOrder() ? $this->guest_name : $this->user->fullname;
+    }
+
+    public function getCustomerEmail()
+    {
+        return $this->isGuestOrder() ? $this->guest_email : $this->user->email;
+    }
+
+    public function getCustomerPhone()
+    {
+        return $this->isGuestOrder() ? $this->guest_phone : $this->user->phone;
+    }
+
+    public function getFullShippingAddress()
+    {
+        return "{$this->shipping_address}, {$this->shipping_city}, {$this->shipping_province}" . 
+               ($this->shipping_postal_code ? " {$this->shipping_postal_code}" : "");
+    }
+
+    // Scopes
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    public function scopeGuest($query)
+    {
+        return $query->whereNull('user_id');
+    }
+
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('order_status', $status);
+    }
+
+    public function scopeByPaymentStatus($query, $status)
+    {
+        return $query->where('payment_status', $status);
+    }
+
+    public function scopeRecent($query, $days = 30)
+    {
+        return $query->where('created_at', '>=', now()->subDays($days));
+    }
+
+    // Status check methods
+    public function isPending()
+    {
+        return $this->order_status === 'pending';
+    }
+
+    public function isConfirmed()
+    {
+        return $this->order_status === 'confirmed';
+    }
+
+    public function isShipped()
+    {
+        return in_array($this->order_status, ['shipped', 'delivered']);
+    }
+
+    public function isDelivered()
+    {
+        return $this->order_status === 'delivered';
+    }
+
+    public function isCancelled()
+    {
+        return $this->order_status === 'cancelled';
+    }
+
+    public function canBeCancelled()
+    {
+        return in_array($this->order_status, ['pending', 'confirmed']);
+    }
+
+    // Payment status methods
+    public function isPaid()
+    {
+        return $this->payment_status === 'completed';
+    }
+
+    public function isPaymentPending()
+    {
+        return $this->payment_status === 'pending';
+    }
+
+    // Calculate total items in order
+    public function getTotalItemsAttribute()
+    {
+        return $this->orderDetails->sum('quantity');
+    }
+
+    // Get order number (formatted ID)
+    public function getOrderNumberAttribute()
+    {
+        return 'ORD' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+    }
+}
+<?php
+// Simplified Cart Model
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Cart extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'session_id'
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function cartDetails()
+    {
+        return $this->hasMany(CartDetail::class);
+    }
+
+
+    public function getTotalAttribute()
+    {
+        return $this->cartDetails->sum(function ($detail) {
+            return $detail->quantity * $detail->price_at_add;
+        });
+    }
+
+
+    public function getTotalItemsAttribute()
+    {
+        return $this->cartDetails->sum('quantity');
+    }
+
+
+    public static function getCart($userId = null, $sessionId = null)
+    {
+        if ($userId) {
+            return static::firstOrCreate(['user_id' => $userId]);
+        }
+
+        return static::firstOrCreate(['session_id' => $sessionId]);
+    }
+
+
+    public function addItem($productId, $quantity = 1)
+    {
+        $product = Product::find($productId);
+
+        $cartDetail = $this->cartDetails()->where('product_id', $productId)->first();
+
+        if ($cartDetail) {
+            $cartDetail->increment('quantity', $quantity);
+        } else {
+            $this->cartDetails()->create([
+                'product_id' => $productId,
+                'quantity' => $quantity,
+                'price_at_add' => $product->price
+            ]);
+        }
+
+        return $this;
+    }
+
+
+    public function removeItem($productId)
+    {
+        $this->cartDetails()->where('product_id', $productId)->delete();
+        return $this;
+    }
+
+
+    public function updateItemQuantity($productId, $quantity)
+    {
+        if ($quantity <= 0) {
+            return $this->removeItem($productId);
+        }
+
+        $this->cartDetails()->where('product_id', $productId)->update([
+            'quantity' => $quantity
+        ]);
+
+        return $this;
+    }
+
+
+ public function clear()
+{
+
+    $this->cartDetails()->delete();
+    return $this;
+}
+
+
+
+    public function transferToUser($userId)
+    {
+
+        $userCart = static::where('user_id', $userId)->first();
+
+        if ($userCart) {
+
+            foreach ($this->cartDetails as $detail) {
+                $userCart->addItem($detail->product_id, $detail->quantity);
+            }
+
+
+            $this->delete();
+
+            return $userCart;
+        } else {
+
+            $this->update([
+                'user_id' => $userId,
+                'session_id' => null
+            ]);
+
+            return $this;
+        }
+    }
+}
+
+
+web.php
+Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('cart');
+    Route::post('/add', [CartController::class, 'add'])->name('cart.add');
+    Route::patch('/update', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::delete('/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('/data', [CartController::class, 'getCartData'])->name('cart.data');
+    Route::patch('/address', [CartController::class, 'updateAddress'])->name('cart.address.update');
+    Route::get('/address', [CartController::class, 'getAddress'])->name('cart.address.get');
+    Route::patch('/guest-info', [CartController::class, 'updateGuestInfo'])->name('cart.guest-info.update');
+    Route::get('/guest-info', [CartController::class, 'getGuestInfo'])->name('cart.guest-info.get');
+    
+    // ✨ Routes mới cần thiết cho checkout process
+    Route::post('/validate-stock', [CartController::class, 'validateStock'])->name('cart.validate-stock');
+});
+
+and js in blade:
+ async function validateCartStock() {
+            try {
+                const response = await fetch('/cart/validate-stock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    }
+                });
+                console.log('response', response)
+                const data = await response.json();
+
+
+                if (!data.success) {
+                    return {
+                        valid: false,
+                        message: data.message || 'Có lỗi xảy ra khi kiểm tra tồn kho!',
+                        cartUpdated: data.cart_updated || false
+                    };
+                }
+
+                return {
+                    valid: true,
+                    message: 'Tất cả sản phẩm đều có sẵn!'
+                };
+
+            } catch (error) {
+                console.error('Stock validation error:', error);
+                return {
+                    valid: false,
+                    message: 'Không thể kiểm tra tồn kho. Vui lòng thử lại!'
+                };
+            }
+        }
+
+
+
+
+it said error 500 tho

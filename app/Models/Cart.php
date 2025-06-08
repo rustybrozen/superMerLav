@@ -90,11 +90,13 @@ class Cart extends Model
     }
 
 
-    public function clear()
-    {
-        $this->delete();
-        return $this;
-    }
+ public function clear()
+{
+
+    $this->cartDetails()->delete();
+    return $this;
+}
+
 
 
     public function transferToUser($userId)
