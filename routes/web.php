@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AdminController;
 
 
 
@@ -90,3 +91,12 @@ Route::middleware('auth')->group(function () {
   Route::post('/user/password', [UserController::class, 'changePassword'])->name('profile.password');
 });
 
+
+
+// Route::middleware(['admin'])->group(function () {
+//     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+// });
+
+
+// Admin testing without an account
+Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
