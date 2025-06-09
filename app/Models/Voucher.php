@@ -26,20 +26,20 @@ class Voucher extends Model
         return $this->hasMany(UserVoucherUsage::class);
     }
 
-    // Check if voucher is valid for use
+ 
     public function isValid()
     {
         $now = now();
         return $this->valid_from <= $now && $this->valid_to >= $now;
     }
 
-    // Check if voucher has reached usage limit
+    
     public function hasReachedLimit()
     {
         return $this->userUsage()->sum('usage_count') >= $this->usage_limit;
     }
 
-    // Calculate discount amount
+  
     public function calculateDiscount($totalPrice)
     {
         if ($totalPrice < $this->condition_total_price) {

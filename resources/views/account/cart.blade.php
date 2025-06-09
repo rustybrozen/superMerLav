@@ -121,7 +121,7 @@
                             </div>
 
                             <!-- Delivery Address -->
-                            <!-- Delivery Address -->
+
                             <div class="mb-6">
                                 <h3 class="text-lg font-semibold text-gray-700 mb-3">Thông tin giao hàng</h3>
 
@@ -221,7 +221,7 @@
                                                     placeholder="Nhập địa chỉ giao hàng chi tiết..."></textarea>
                                             </div>
 
-                                            <button type="submit"
+                                            <button type="submit" id="guest-buttom-submit-info"
                                                 class="w-full px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors">
                                                 <i class="fas fa-save mr-2"></i>
                                                 Lưu thông tin giao hàng
@@ -380,7 +380,7 @@
                             </div>
 
                             <!-- Checkout Button -->
-                            <button
+                            <button id="checkout-btn"
                                 class="w-full bg-green-600 text-white font-bold text-lg py-4 rounded-lg hover:bg-green-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
                                 <i class="fas fa-credit-card mr-2"></i>
                                 Thanh toán ngay
@@ -401,7 +401,7 @@
             const cardDetails = document.getElementById('card-details');
             const guestInfoForm = document.getElementById('guest-info-form');
             const editGuestInfoBtn = document.getElementById('edit-guest-info');
-            const checkoutBtn = document.querySelector('.w-full.bg-green-600');
+            const checkoutBtn = document.querySelector('#checkout-btn');
 
 
 
@@ -409,6 +409,7 @@
                 guestInfoForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     updateGuestInfo();
+                    dd
                 });
             }
 
@@ -471,7 +472,6 @@
 
             checkoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-
                 processCheckout();
             });
 
@@ -494,15 +494,10 @@
                 const address = addressInput.value ? addressInput.value.trim() : '';
                 const fullName = fullNameInput.value ? fullNameInput.value.trim() : '';
 
-                console.log('Input values:', {
-                    email,
-                    phone,
-                    address,
-                    fullName
-                });
+
 
                 if (!email || !phone || !address || !fullName) {
-                    console.log('Validation failed - empty fields');
+
                     showNotification('Vui lòng nhập đầy đủ thông tin!', 'error');
                     return;
                 }
@@ -517,8 +512,8 @@
                     return;
                 }
 
-                const submitBtnInfo = guestInfoForm.querySelector('button[type="submit"]');
-                const originalText = submitBtnInfo.innerHTML; // 🎯 Fixed: Use submitBtnInfo instead of submitBtn
+                const submitBtnInfo = guestInfoForm.querySelector('#guest-buttom-submit-info');
+                const originalText = submitBtnInfo.innerHTML;
                 submitBtnInfo.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang lưu...';
                 submitBtnInfo.disabled = true;
 
@@ -547,14 +542,12 @@
                         body: JSON.stringify(dataToSend)
                     })
                     .then(response => {
-                        console.log('Response status:', response.status);
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Response data:', data);
                         if (data.success) {
                             showNotification(data.message, 'success');
                             showGuestInfo(data.data);
@@ -666,8 +659,10 @@
                         if (data.success) {
                             const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
                             const subtotalElement = cartItem.querySelector('.item-subtotal');
+                            const inputQuantity = cartItem.querySelector('input.quantity-input');
                             if (data.item_subtotal) {
                                 subtotalElement.textContent = data.item_subtotal + ' ₫';
+                                inputQuantity.value = data.quantity;
                             }
                             updateCartDisplay(data);
                             showNotification(data.message, 'success');
@@ -766,31 +761,37 @@
                 checkoutBtn.disabled = true;
 
                 try {
-                    console.log('Validating customer info...');
+
                     const customerInfo = await validateCustomerInfo();
                     if (!customerInfo.valid) {
                         showNotification(customerInfo.message, 'error');
                         return;
                     }
 
-                    console.log('Validating payment method...');
+
+
                     const paymentInfo = validatePaymentMethod();
                     if (!paymentInfo.valid) {
                         showNotification(paymentInfo.message, 'error');
                         return;
                     }
 
-                    console.log('Validating cart stock...');
+
                     const stockCheck = await validateCartStock();
                     if (!stockCheck.valid) {
                         showNotification(stockCheck.message, 'error');
-                        if (stockCheck.cartUpdated) {
-                            location.reload();
-                        }
+
+
+
+                        setTimeout(() => {
+                            if (stockCheck.cartUpdated) {
+                                location.reload();
+                            }
+                        }, 3000);
                         return;
                     }
 
-                    console.log('Creating order...');
+
                     const orderData = {
                         customer_info: customerInfo.data,
                         payment_method: paymentInfo.method,
@@ -800,7 +801,7 @@
                     const order = await createOrder(orderData);
 
                     if (order.success) {
-                        console.log('Order created successfully, redirecting...');
+
                         window.location.href = `/order/success/${order.order_id}`;
                     } else {
                         showNotification(order.message || 'Có lỗi xảy ra khi tạo đơn hàng!', 'error');
@@ -822,7 +823,9 @@
                         'content') === 'true';
 
                     if (isAuthenticated) {
-                        
+                        validateCustomerInfo
+
+
                         const userNameMeta = document.querySelector('meta[name="full-name"]');
                         const userEmailMeta = document.querySelector('meta[name="user-email"]');
                         const userPhoneMeta = document.querySelector('meta[name="user-phone"]');
@@ -898,7 +901,6 @@
                                 };
                             }
 
-                            // Validate required fields from response
                             if (!data.data?.fullname || !data.data?.email || !data.data?.phone || !data.data
                                 ?.address) {
                                 const missingFields = [];
@@ -1022,7 +1024,7 @@
                         }
                     });
 
-                    console.log('Stock validation response:', response);
+
                     const data = await response.json();
 
                     if (!data.success) {

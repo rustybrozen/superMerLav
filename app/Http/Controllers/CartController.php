@@ -28,7 +28,6 @@ class CartController extends Controller
         if (Auth::check()) {
             return Cart::getCart(Auth::id());
         }
-
         return Cart::getCart(null, session()->getId());
     }
 
@@ -46,16 +45,10 @@ class CartController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1'
         ]);
-
         $productId = $request->input('product_id');
         $quantity = $request->input('quantity');
-
-
         $cart = $this->getOrCreateCart();
-
-
         $cart->addItem($productId, $quantity);
-
         return response()->json([
             'success' => true,
             'message' => 'Đã thêm sản phẩm vào giỏ hàng!',
@@ -83,31 +76,25 @@ class CartController extends Controller
         $quantity = $request->input('quantity');
 
         $cart = $this->getOrCreateCart();
-
-
         $cartDetail = $cart->cartDetails()->where('product_id', $productId)->first();
-
         if (!$cartDetail) {
             return response()->json([
                 'success' => false,
                 'message' => 'Sản phẩm không có trong giỏ hàng!'
             ], 404);
         }
-
-
         $cart->updateItemQuantity($productId, $quantity);
-
-
         $cart->refresh();
-
         return response()->json([
             'success' => true,
             'message' => 'Đã cập nhật số lượng!',
             'cart_count' => $cart->total_items,
+            'quantity' => $cart->cartDetails()->where('product_id', $productId)->first()->quantity,
             'cart_total' => number_format($cart->total),
             'item_subtotal' => number_format($cartDetail->fresh()->subtotal)
         ]);
     }
+
 
 
 
@@ -121,26 +108,17 @@ class CartController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id'
         ]);
-
         $productId = $request->input('product_id');
         $cart = $this->getOrCreateCart();
-
-
         $cartDetail = $cart->cartDetails()->where('product_id', $productId)->first();
-
         if (!$cartDetail) {
             return response()->json([
                 'success' => false,
                 'message' => 'Sản phẩm không có trong giỏ hàng!'
             ], 404);
         }
-
-
         $cart->removeItem($productId);
-
-
         $cart->refresh();
-
         return response()->json([
             'success' => true,
             'message' => 'Đã xóa sản phẩm khỏi giỏ hàng!',
@@ -160,7 +138,6 @@ class CartController extends Controller
     {
         $cart = $this->getOrCreateCart();
         $cart->clear();
-
         return response()->json([
             'success' => true,
             'message' => 'Đã xóa toàn bộ giỏ hàng!'
@@ -179,7 +156,6 @@ class CartController extends Controller
     public function getCartData()
     {
         $cart = $this->getOrCreateCart();
-
         return response()->json([
             'success' => true,
             'cart_count' => $cart->total_items,
@@ -196,6 +172,9 @@ class CartController extends Controller
         ]);
     }
 
+
+
+
     public function updateAddress(Request $request)
     {
         $request->validate([
@@ -205,10 +184,8 @@ class CartController extends Controller
         $address = $request->input('address');
 
         if (Auth::check()) {
-            // Update user's saved address
             $user = Auth::user();
             $user->update(['address' => $address]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Đã cập nhật địa chỉ thành công!',
@@ -216,9 +193,7 @@ class CartController extends Controller
                 'user_authenticated' => true
             ]);
         } else {
-            // Store address in session for guest users
             session(['guest_address' => $address]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Đã lưu địa chỉ giao hàng!',
@@ -227,6 +202,13 @@ class CartController extends Controller
             ]);
         }
     }
+
+
+
+
+
+
+
 
     public function getAddress()
     {
@@ -249,33 +231,34 @@ class CartController extends Controller
 
 
 
+
+
+
+
     public function updateGuestInfo(Request $request)
     {
-        
-         Log::info($request->all());
+
+    
         $request->validate([
             'address' => 'required|string|max:500',
             'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255'
-
+            'email' => 'required|email|max:255',
+            'fullname' => 'required|string|max:50'
         ]);
 
-        Log::info('Update Guest Info');
+  
         if (Auth::check()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Phương thức này chỉ dành cho khác không sử dụng tài khoản!'
             ], 400);
         }
-
-
         session([
             'guest_address' => $request->address,
             'guest_phone' => $request->phone,
             'guest_email' => $request->email,
             'guest_fullname' => $request->fullname
         ]);
-
         return response()->json([
             'success' => true,
             'message' => 'Đã lưu thông tin giao hàng!',
@@ -288,9 +271,20 @@ class CartController extends Controller
         ]);
     }
 
+
+
+
+
+
+
+
+
+
+
+
     public function getGuestInfo()
     {
-      
+
         if (Auth::check()) {
             return response()->json([
                 'success' => true,
@@ -303,7 +297,6 @@ class CartController extends Controller
                 ]
             ]);
         }
-
         return response()->json([
             'success' => true,
             'user_authenticated' => false,
@@ -315,9 +308,5 @@ class CartController extends Controller
             ]
         ]);
     }
-
-
-
-
 
 }

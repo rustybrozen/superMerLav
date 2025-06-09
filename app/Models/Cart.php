@@ -82,6 +82,15 @@ class Cart extends Model
             return $this->removeItem($productId);
         }
 
+        $productStock = Product::find($productId)->quantity;
+
+        if ($quantity > $productStock) {
+            return $this->cartDetails()->where('product_id', $productId)->update([
+                'quantity' => $productStock
+            ]);
+
+        }
+
         $this->cartDetails()->where('product_id', $productId)->update([
             'quantity' => $quantity
         ]);
@@ -90,12 +99,12 @@ class Cart extends Model
     }
 
 
- public function clear()
-{
+    public function clear()
+    {
 
-    $this->cartDetails()->delete();
-    return $this;
-}
+        $this->cartDetails()->delete();
+        return $this;
+    }
 
 
 

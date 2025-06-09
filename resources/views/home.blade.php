@@ -65,7 +65,7 @@
     </section>
 
     <!-- Vouchers Section -->
-    <section class="py-16 bg-red-500">
+    {{-- <section class="py-16 bg-red-500">
         <div class="container mx-auto px-4">
             <h2 class="text-4xl font-bold text-center text-white mb-12">Mã Giảm Giá</h2>
             <div class="grid md:grid-cols-3 gap-6">
@@ -130,7 +130,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
 
     <!-- Categories Section -->
     <section class="py-16 bg-gray-50">
@@ -234,10 +234,10 @@
             </div>
 
             <div class="text-center mt-8">
-                <button
+                <a href="{{ route('shop') }}"
                     class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-300">
                     Xem Thêm
-                </button>
+                </a>
             </div>
         </div>
     </section>

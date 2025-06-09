@@ -22,12 +22,13 @@
                 </form>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {{-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> --}}
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- User Info Card --}}
                 <div class="bg-blue-50 rounded-xl p-6">
                     <h3 class="text-lg font-semibold text-blue-800 mb-4">Thông tin tài khoản</h3>
                     <div class="space-y-2 text-sm">
-                        <p><span class="font-medium">Username:</span> {{ Auth::user()->username }}</p>
+                        <p><span class="font-medium">Họ và tên:</span> {{ Auth::user()->fullname }}</p>
                         <p><span class="font-medium">Email:</span> {{ Auth::user()->email ?? 'Chưa cập nhật' }}</p>
                         <p><span class="font-medium">Điện thoại:</span> {{ Auth::user()->phone ?? 'Chưa cập nhật' }}</p>
                         <p><span class="font-medium">Địa chỉ:</span> {{ Auth::user()->address ?? 'Chưa cập nhật' }}</p>
@@ -44,13 +45,13 @@
                 </div>
 
                 {{-- Reviews Card --}}
-                <div class="bg-yellow-50 rounded-xl p-6">
+                {{-- <div class="bg-yellow-50 rounded-xl p-6">
                     <h3 class="text-lg font-semibold text-yellow-800 mb-4">Đánh giá</h3>
                     <div class="text-center">
                         <div class="text-3xl font-bold text-yellow-600">{{ Auth::user()->reviews->count() }}</div>
                         <p class="text-sm text-yellow-700">Đánh giá đã viết</p>
                     </div>
-                </div>
+                </div> --}}
             </div>
 
             {{-- Quick Actions --}}

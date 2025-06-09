@@ -23,13 +23,13 @@ class CartDetail extends Model
         return $this->belongsTo(Product::class);
     }
 
-    // Get subtotal for this cart detail
+    
     public function getSubtotalAttribute()
     {
         return $this->quantity * $this->price_at_add;
     }
 
-    // Check if product price has changed since added to cart
+    
     public function getPriceChangedAttribute()
     {
         return $this->price_at_add !== $this->product->price;

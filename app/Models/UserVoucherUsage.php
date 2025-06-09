@@ -20,12 +20,15 @@ class UserVoucherUsage extends Model
         return $this->belongsTo(User::class);
     }
 
+
+
     public function voucher()
     {
         return $this->belongsTo(Voucher::class);
     }
 
-    // Check if user can still use this voucher
+    
+  
     public function canUse()
     {
         return $this->usage_count < $this->voucher->user_usage_limit;

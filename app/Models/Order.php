@@ -26,7 +26,7 @@ class Order extends Model
         'delivered_at' => 'datetime',
     ];
 
-    // Relationships
+    
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -42,7 +42,7 @@ class Order extends Model
         return $this->hasOne(ProductReview::class);
     }
 
-    // Helper methods
+  
     public function isGuestOrder()
     {
         return is_null($this->user_id);
@@ -69,7 +69,7 @@ class Order extends Model
                ($this->shipping_postal_code ? " {$this->shipping_postal_code}" : "");
     }
 
-    // Scopes
+    
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
@@ -95,7 +95,7 @@ class Order extends Model
         return $query->where('created_at', '>=', now()->subDays($days));
     }
 
-    // Status check methods
+   
     public function isPending()
     {
         return $this->order_status === 'pending';
@@ -126,7 +126,7 @@ class Order extends Model
         return in_array($this->order_status, ['pending', 'confirmed']);
     }
 
-    // Payment status methods
+    
     public function isPaid()
     {
         return $this->payment_status === 'completed';
@@ -137,13 +137,13 @@ class Order extends Model
         return $this->payment_status === 'pending';
     }
 
-    // Calculate total items in order
+    
     public function getTotalItemsAttribute()
     {
         return $this->orderDetails->sum('quantity');
     }
 
-    // Get order number (formatted ID)
+    
     public function getOrderNumberAttribute()
     {
         return 'ORD' . str_pad($this->id, 6, '0', STR_PAD_LEFT);

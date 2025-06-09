@@ -19,6 +19,7 @@ class ProductController extends Controller
         return view('shop.shop', compact('products', 'categories', 'priceStats'));
     }
 
+
     private function getFiltersFromRequest($request)
     {
         return [
@@ -36,7 +37,6 @@ class ProductController extends Controller
         if (empty(trim($searchQuery))) {
             return $query; 
         }
-
         return $query->where(function ($q) use ($searchQuery) {
             $q->where('name', 'LIKE', "%{$searchQuery}%")
                 ->orWhereHas('category', function ($categoryQuery) use ($searchQuery) {
@@ -44,6 +44,7 @@ class ProductController extends Controller
                 });
         });
     }
+
 
     private function applyPriceFilters($query, $minPrice, $maxPrice)
     {
@@ -107,11 +108,9 @@ class ProductController extends Controller
     {
         $query = Product::where('is_active', true);
         $query = $this->applySearchFilter($query, $filters['search']);
-
         if ($filters['category']) {
             $query->where('category_id', $filters['category']);
         }
-
         return $query->selectRaw('MIN(price) as min_price, MAX(price) as max_price, AVG(price) as avg_price')
             ->first();
     }
@@ -119,7 +118,6 @@ class ProductController extends Controller
     public function getCategoriesAjax(Request $request)
     {
         $search = $request->get('search', '');
-
         $categories = Category::when($search, function ($query, $search) {
             return $query->where('name', 'LIKE', "%{$search}%");
         })
@@ -129,7 +127,6 @@ class ProductController extends Controller
                 }
             ])
             ->get();
-
         return response()->json($categories);
     }
 

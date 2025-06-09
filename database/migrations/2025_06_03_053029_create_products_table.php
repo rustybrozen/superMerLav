@@ -20,10 +20,10 @@ return new class extends Migration
             $table->integer('quantity')->default(0);
             $table->foreignId('category_id')->nullable()->constrained('categories');
             $table->string('image', 100)->default('assets/uploads/default.jpg');
-            $table->integer('in_price')->nullable(); // Cost price
+            $table->integer('in_price')->nullable(); 
             $table->boolean('is_active')->default(true);
             $table->boolean('hot')->default(false);
-            $table->timestamp('deleted_at')->nullable(); // For soft deletes
+            $table->timestamp('deleted_at')->nullable(); 
             $table->timestamps();
         });
     }

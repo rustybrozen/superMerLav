@@ -53,25 +53,23 @@ Route::prefix('cart')->group(function () {
   Route::delete('/remove', [CartController::class, 'remove'])->name('cart.remove');
   Route::delete('/clear', [CartController::class, 'clear'])->name('cart.clear');
   Route::get('/data', [CartController::class, 'getCartData'])->name('cart.data');
-  Route::patch('/address', [CartController::class, 'updateAddress'])->name('cart.address.update');
-  Route::get('/address', [CartController::class, 'getAddress'])->name('cart.address.get');
+  // Route::patch('/address', [CartController::class, 'updateAddress'])->name('cart.address.update');
+  // Route::get('/address', [CartController::class, 'getAddress'])->name('cart.address.get');
 
 
 
   Route::get('/guest-info', [CartController::class, 'getGuestInfo'])->name('cart.guest-info.get');
   Route::patch('/guest-info', [CartController::class, 'updateGuestInfo'])->name('cart.guest-info.update');
-
   Route::post('/validate-stock', [CheckoutController::class, 'validateStock'])->name('cart.validate-stock');
 });
 
-// 🛒 Checkout routes - Đây là phần quan trọng nhất!
+
 Route::prefix('checkout')->group(function () {
   Route::post('/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
-  Route::get('/success/{orderId}', [CheckoutController::class, 'success'])->name('checkout.success');
   Route::get('/failed', [CheckoutController::class, 'failed'])->name('checkout.failed');
 });
 
-// 📦 Order routes để xem kết quả
+
 Route::prefix('order')->group(function () {
   Route::get('/success/{orderId}', [OrderController::class, 'success'])->name('order.success');
   Route::get('/details/{orderId}', [OrderController::class, 'details'])->name('order.details');

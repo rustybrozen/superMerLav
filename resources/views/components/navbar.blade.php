@@ -18,7 +18,7 @@
                             Trang Chủ
                         </a>
                     </li>
-                    <li class="relative group">
+                    {{-- <li class="relative group">
                         <button
                             class="hover:text-green-200 flex items-center transition-colors py-2 px-1 border-b-2 border-transparent group-hover:border-green-200">
                             Danh Mục
@@ -40,7 +40,7 @@
                                     class="block px-4 py-3 hover:bg-green-50 hover:text-green-700 transition-colors">🥩
                                     Thịt Tươi</a></li>
                         </ul>
-                    </li>
+                    </li> --}}
                     <li>
                         <a href="{{ route('shop') }}"
                             class="hover:text-green-200 transition-colors py-2 px-1 border-b-2 border-transparent hover:border-green-200">
@@ -175,7 +175,7 @@
             <ul class="py-2">
                 <li><a href="{{ route('home') }}"
                         class="block px-4 py-3 text-white hover:bg-green-700 transition-colors">Trang Chủ</a></li>
-                <li>
+                {{-- <li>
                     <button
                         class="w-full text-left px-4 py-3 text-white hover:bg-green-700 transition-colors flex items-center justify-between"
                         onclick="document.getElementById('mobileCategoryMenu').classList.toggle('hidden')">
@@ -193,7 +193,7 @@
                                 class="block px-8 py-2 text-white hover:bg-green-800 transition-colors">🥩 Thịt Tươi</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
                 <li><a href="{{ route('shop') }}"
                         class="block px-4 py-3 text-white hover:bg-green-700 transition-colors">Cửa Hàng</a></li>
                 <li><a href="" class="block px-4 py-3 text-white hover:bg-green-700 transition-colors">Về Chúng

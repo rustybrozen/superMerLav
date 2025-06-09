@@ -29,13 +29,13 @@ class ProductReview extends Model
         return $this->belongsTo(Order::class);
     }
 
-    // Scope for filtering by rating
+    
     public function scopeWithRating($query, $rating)
     {
         return $query->where('rating', $rating);
     }
 
-    // Scope for recent reviews
+    
     public function scopeRecent($query, $days = 30)
     {
         return $query->where('created_at', '>=', now()->subDays($days));
