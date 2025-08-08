@@ -35,7 +35,7 @@ class ProductController extends Controller
     private function applySearchFilter($query, $searchQuery)
     {
         if (empty(trim($searchQuery))) {
-            return $query; 
+            return $query;
         }
         return $query->where(function ($q) use ($searchQuery) {
             $q->where('name', 'LIKE', "%{$searchQuery}%")
@@ -59,7 +59,7 @@ class ProductController extends Controller
         return $query;
     }
 
-  
+
     private function applySorting($query, $sort)
     {
         $query->orderByRaw('quantity = 0');
@@ -74,13 +74,17 @@ class ProductController extends Controller
             case 'name_desc':
                 return $query->orderBy('name', 'desc');
             default:
-                return $query->orderBy('created_at', 'desc'); 
+                return $query->orderBy('created_at', 'desc');
         }
     }
 
     private function getFilteredProducts($filters)
     {
-        $query = Product::where('is_active', true);
+        $query = Product::where('is_active', true)
+            ->whereHas('category', function ($q) {
+                $q->where('is_active', true);
+            });
+
         $query = $this->applySearchFilter($query, $filters['search']);
 
         if ($filters['category']) {
@@ -94,14 +98,18 @@ class ProductController extends Controller
 
     private function getCategoriesWithCounts($searchQuery = null)
     {
-        return Category::withCount([
-            'products' => function ($query) use ($searchQuery) {
-                $query->where('is_active', true);
-                if (!empty(trim($searchQuery))) {
-                    $query->where('name', 'LIKE', "%{$searchQuery}%");
+        return Category::where('is_active', true)
+            ->withCount([
+                'products' => function ($query) use ($searchQuery) {
+                    $query->where('is_active', true)
+                        ->whereHas('category', function ($q) {
+                            $q->where('is_active', true);
+                        });
+                    if (!empty(trim($searchQuery))) {
+                        $query->where('name', 'LIKE', "%{$searchQuery}%");
+                    }
                 }
-            }
-        ])->get();
+            ])->get();
     }
 
     private function getPriceStatistics($filters)
@@ -132,6 +140,7 @@ class ProductController extends Controller
 
     public function detail(Product $product)
     {
+        $product->load('images');
         return view('shop.detail', compact('product'));
     }
 }

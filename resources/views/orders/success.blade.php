@@ -182,15 +182,14 @@
                                 @if ($order->discount_amount > 0)
                                     <div class="flex justify-between text-green-600">
                                         <span>Giảm giá:</span>
-                                        <span class="font-semibold">-{{ number_format($order->discount_amount) }}
-                                            ₫</span>
+                                        <span class="font-semibold">-{{ number_format($order->discount_amount, 0, ',', '.') }}₫</p></span>
                                     </div>
                                 @endif
 
                                 <div class="border-t border-gray-300 pt-3">
                                     <div class="flex justify-between text-xl font-bold text-gray-900">
                                         <span>Tổng cộng:</span>
-                                        <span class="text-green-600">{{ number_format($order->total_amount) }} ₫</span>
+                                        <span class="text-green-600">{{ number_format($order->total_amount, 0, ',', '.') }}₫</p>
                                     </div>
                                 </div>
                             </div>
@@ -230,32 +229,7 @@
                         </div>
                     </div>
 
-                    <!-- Contact Information -->
-                    <div class="mb-8">
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                            <h3 class="text-lg font-bold text-yellow-900 mb-4">
-                                <i class="fas fa-phone-alt mr-2"></i>
-                                Cần hỗ trợ?
-                            </h3>
-                            <div class="text-yellow-800 space-y-2">
-                                <p>Nếu bạn có bất kỳ câu hỏi nào về đơn hàng, vui lòng liên hệ với chúng tôi:</p>
-                                <div class="flex flex-wrap gap-4 mt-3">
-                                    <div class="flex items-center space-x-2">
-                                        <i class="fas fa-phone text-green-600"></i>
-                                        <span class="font-semibold">Hotline: 1900-xxxx</span>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <i class="fas fa-envelope text-green-600"></i>
-                                        <span class="font-semibold">Email: support@example.com</span>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <i class="fab fa-facebook-messenger text-green-600"></i>
-                                        <span class="font-semibold">Chat trực tuyến</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                
 
                     <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">

@@ -1,18 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
-class UserController extends Controller
-{
-    public function showProfile(Request $request)
-    {
-        return view('account.profile', ['user' => $request->user()]);
-    }
 
-    public function updateProfile(Request $request)
+class AdminProfileController extends Controller
+{
+ 
+    public function index(Request $request){
+        return view('admin.profile', ['user' => $request->user()]);
+    }
+ 
+
+   public function updateProfile(Request $request)
     {
         $user = $request->user();
         $validated = $request->validate([

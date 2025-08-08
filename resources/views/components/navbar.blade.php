@@ -9,7 +9,7 @@
                 <span>Fresh Mart</span>
             </a>
 
-            <!-- Desktop Menu -->
+            
             <div class="hidden lg:flex items-center space-x-8">
                 <ul class="flex items-center space-x-6 text-white font-medium">
                     <li>
@@ -18,29 +18,7 @@
                             Trang Chủ
                         </a>
                     </li>
-                    {{-- <li class="relative group">
-                        <button
-                            class="hover:text-green-200 flex items-center transition-colors py-2 px-1 border-b-2 border-transparent group-hover:border-green-200">
-                            Danh Mục
-                            <i
-                                class="fas fa-chevron-down ml-1 text-xs transform group-hover:rotate-180 transition-transform"></i>
-                        </button>
-                        <ul
-                            class="absolute left-0 top-full mt-1 bg-white text-gray-700 shadow-xl rounded-lg hidden group-hover:block min-w-[160px] overflow-hidden border border-gray-100">
-                            <li><a href="{{ route('shop') }}"
-                                    class="block px-4 py-3 hover:bg-green-50 hover:text-green-700 transition-colors">🥬
-                                    Rau Củ</a></li>
-                            <li><a href="shop.html?category_id=1"
-                                    class="block px-4 py-3 hover:bg-green-50 hover:text-green-700 transition-colors">🥬
-                                    Rau Củ</a></li>
-                            <li><a href="{{ route('shop') }}"
-                                    class="block px-4 py-3 hover:bg-green-50 hover:text-green-700 transition-colors">🍎
-                                    Trái Cây</a></li>
-                            <li><a href="{{ route('shop') }}"
-                                    class="block px-4 py-3 hover:bg-green-50 hover:text-green-700 transition-colors">🥩
-                                    Thịt Tươi</a></li>
-                        </ul>
-                    </li> --}}
+                   
                     <li>
                         <a href="{{ route('shop') }}"
                             class="hover:text-green-200 transition-colors py-2 px-1 border-b-2 border-transparent hover:border-green-200">
@@ -91,7 +69,7 @@
                                         </a>
                                     </li>
 
-                                    <!-- Cập nhật thông tin -->
+                                
                                     <li>
                                         <a href="{{ route('profile.show') }}"
                                             class="px-5 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3">
@@ -100,16 +78,16 @@
                                         </a>
                                     </li>
 
-                                    <!-- Đơn hàng của tôi -->
+                                 
                                     <li>
-                                        <a href="#"
+                                        <a href="{{ route('order.all') }}"
                                             class="px-5 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3">
                                             <i class="fas fa-shopping-bag text-emerald-500"></i>
                                             <span>Đơn hàng của tôi</span>
                                         </a>
                                     </li>
 
-                                    <!-- Quản trị (chỉ hiển thị nếu là admin) -->
+                                 
                                     @if (Auth::user()->is_admin)
                                         <li class="border-t border-gray-100">
                                             <a href="#"

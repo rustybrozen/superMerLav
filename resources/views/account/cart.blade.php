@@ -54,13 +54,12 @@
                                             <h3 class="text-lg font-semibold text-gray-800">{{ $item->product->name }}
                                             </h3>
                                             <p class="text-green-600 font-bold">
-                                                {{ number_format($item->price_at_add) }}
-                                                ₫</p>
+                                                {{ number_format($item->price_at_add, 0, ',', '.') }}₫</p>
 
                                             @if ($item->price_changed)
                                                 <div class="text-xs text-orange-600">
                                                     <i class="fas fa-exclamation-triangle mr-1"></i>
-                                                    Giá đã thay đổi: {{ number_format($item->product->price) }} ₫
+                                                    Giá đã thay đổi: {{ number_format($item->product->price, 0, ',', '.') }}₫</p>
                                                 </div>
                                             @endif
                                         </div>
@@ -84,7 +83,7 @@
 
                                             <div class="text-right">
                                                 <p class="text-lg font-bold text-gray-800 item-subtotal">
-                                                    {{ number_format($item->subtotal) }} ₫</p>
+                                                    {{ number_format($item->subtotal, 0, ',', '.') }}₫</p>
                                             </div>
 
                                             <button
@@ -295,7 +294,7 @@
                                     <span class="font-semibold text-gray-700">Sản phẩm: <span
                                             id="summary-count">{{ $cart->total_items }}</span></span>
                                     <span class="font-bold text-gray-800"
-                                        id="summary-subtotal">{{ number_format($cart->total) }} ₫</span>
+                                        id="summary-subtotal">{{ number_format($cart->total, 0, ',', '.') }}₫</p>
                                 </div>
 
                                 <div class="flex justify-between items-center text-lg">
@@ -313,7 +312,7 @@
                                 <div class="flex justify-between items-center text-xl">
                                     <span class="font-bold text-gray-800">Tổng cộng:</span>
                                     <span class="font-bold text-green-600 text-2xl"
-                                        id="summary-total">{{ number_format($cart->total) }} ₫</span>
+                                        id="summary-total">{{ number_format($cart->total, 0, ',', '.') }}₫</p>
                                 </div>
                             </div>
 

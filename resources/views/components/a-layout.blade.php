@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
          <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ $title ?? '' }} - Fresh Mart</title>
+        <title>Admin Panel - Fresh Mart</title>
 
 
         <!-- Fonts -->
@@ -26,35 +26,40 @@
         @endif
     </head>
     
-<body class="bg-white text-gray-800 min-h-dvh w-full flex flex-col">
-    <div class="bg-green-600 text-white text-sm py-1">
-        <div class="container mx-auto text-center flex items-center">
-            <marquee>Chào mừng bạn đến với Mini Market, nơi cung cấp những thứ bạn cần.</marquee>
-        </div>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+  <x-a-sidebar/>
+
+  <!-- Main Content Area -->
+  <div class="lg:ml-64 min-h-screen">
+    <div class="p-6">
+      @if (session('message'))
+          <div class="bg-green-100 border-l-4 border-green-500 text-green-700 px-4 py-3 mb-6 rounded-r shadow-sm">
+              <div class="flex items-center">
+                  <i class="fas fa-check-circle mr-2"></i>
+                  {{ session('message') }}
+              </div>
+          </div>
+      @endif
+
+      @if ($errors->any())
+          <div class="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 mb-6 rounded-r shadow-sm">
+              <div class="flex items-start">
+                  <i class="fas fa-exclamation-triangle mr-2 mt-1"></i>
+                  <div>
+                      <ul class="list-disc list-inside space-y-1">
+                          @foreach ($errors->all() as $error)
+                              <li>{{ $error }}</li>
+                          @endforeach
+                      </ul>
+                  </div>
+              </div>
+          </div>
+      @endif
+
+      {{ $slot }}
     </div>
+  </div>
 
-    <x-navbar/>
-
-    <main class="flex-1 container mx-auto w-full px-4">
-        @if (session('message'))
-            <div class="bg-emerald-50 text-emerald-800 px-4 py-2 rounded-md mb-3 border border-emerald-200">
-                {{ session('message') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="bg-red-50 text-red-700 px-4 py-2 rounded-md mb-3 border border-red-200">
-                <ul class="list-disc pl-5">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        {{ $slot }}
-    </main>
-
-    <x-footer />
 </body>
-
+</html>

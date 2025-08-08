@@ -8,11 +8,11 @@
 
     <div class="container mx-auto px-4 py-8">
         <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Sidebar - Categories -->
+
             <div class="lg:w-1/4">
                 <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-100 sticky top-4">
 
-                    <!-- Clear All Filters Button -->
+
                     @if (request()->has('category') || request()->has('min_price') || request()->has('max_price') || request()->has('q'))
                         <div class="mb-6 pb-4 border-b border-gray-200">
                             <a href="{{ route('shop', ['sort' => request('sort')]) }}"
@@ -26,7 +26,7 @@
                         </div>
                     @endif
 
-                    <!-- Price Range Filter -->
+
                     <div class="mb-6">
                         <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                             <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor"
@@ -39,7 +39,7 @@
                         </h4>
 
                         <form method="GET" action="{{ route('shop') }}" id="priceFilterForm">
-                            <!-- Preserve ALL existing filters -->
+
                             @if (request('category'))
                                 <input type="hidden" name="category" value="{{ request('category') }}">
                             @endif
@@ -68,24 +68,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Quick Price Range Buttons -->
-                                <div class="grid grid-cols-2 gap-2 text-xs">
-                                    <button type="button" onclick="setPriceRange(0, 100000)"
-                                        class="px-3 py-2 bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700 rounded-lg transition-colors">
-                                        < 100k </button>
-                                            <button type="button" onclick="setPriceRange(100000, 500000)"
-                                                class="px-3 py-2 bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700 rounded-lg transition-colors">
-                                                100k - 500k
-                                            </button>
-                                            <button type="button" onclick="setPriceRange(500000, 1000000)"
-                                                class="px-3 py-2 bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700 rounded-lg transition-colors">
-                                                500k - 1M
-                                            </button>
-                                            <button type="button" onclick="setPriceRange(1000000, null)"
-                                                class="px-3 py-2 bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700 rounded-lg transition-colors">
-                                                > 1M
-                                            </button>
-                                </div>
+
+
 
                                 <button type="submit"
                                     class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors font-medium text-sm">
@@ -95,7 +79,7 @@
                         </form>
                     </div>
 
-                    <!-- Categories Filter -->
+
                     <div>
                         <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                             <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor"
@@ -115,7 +99,7 @@
                             </button>
                         </h4>
 
-                        <!-- Search Categories -->
+
                         <div class="mb-3">
                             <div class="relative">
                                 <input type="text" id="categorySearch" placeholder="Tìm danh mục..."
@@ -130,7 +114,7 @@
                         </div>
 
                         <div id="categoryList" class="space-y-2 max-h-64 overflow-y-auto">
-                            <!-- All Categories -->
+
                             <div class="category-item">
                                 <div
                                     class="{{ request()->has('category') ? 'hover:bg-green-50 text-green-700' : 'bg-green-600 text-white' }} rounded-lg cursor-pointer transition-colors">
@@ -149,8 +133,7 @@
                                             ALL
                                         </div>
                                         <span class="font-medium">Tất cả</span>
-                                        <span
-                                            class="ml-auto text-xs opacity-75">({{ $products->total() ?? 0 }})</span>
+                                        <span class="ml-auto text-xs opacity-75">({{ $products->total() ?? 0 }})</span>
                                     </a>
                                 </div>
                             </div>
@@ -174,7 +157,7 @@
                                             ]),
                                         ) }}"
                                             class="flex items-center p-3 {{ $isActive ? 'text-white' : 'text-green-700 group-hover:text-green-800' }}">
-                                            <img src="https://placehold.co/30x30/4ade80/ffffff?text={{ urlencode(mb_substr($category->name, 0, 2)) }}"
+                                            <img src="{{ asset('/' . $category->image) }}"
                                                 alt="{{ $category->name }}" class="w-8 h-8 rounded mr-3">
                                             <span class="font-medium flex-1">{{ $category->name }}</span>
                                             <span class="text-xs opacity-75">({{ $productCount }})</span>
@@ -193,12 +176,12 @@
                 </div>
             </div>
 
-            <!-- Main Content -->
+
             <div class="lg:w-3/4">
-                <!-- Search and Filter Bar -->
+
                 <div class="bg-white rounded-xl p-6 shadow-lg border border-gray-100 mb-8">
                     <form method="GET" action="{{ route('shop') }}" class="flex flex-col md:flex-row gap-4">
-                        <!-- Preserve existing filters in search form -->
+
                         @if (request('category'))
                             <input type="hidden" name="category" value="{{ request('category') }}">
                         @endif
@@ -240,7 +223,7 @@
                         </button>
                     </form>
 
-                    <!-- Show active filters -->
+
                     @if (request()->hasAny(['category', 'min_price', 'max_price', 'q']))
                         <div class="mt-4 pt-4 border-t border-gray-200">
                             <div class="flex flex-wrap gap-2 items-center">
@@ -304,14 +287,14 @@
                     @endif
                 </div>
 
-                <!-- Products Grid -->
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
                     @forelse ($products as $product)
                         <div
                             class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 {{ $product->quantity <= 0 ? 'opacity-75' : '' }}">
                             <div class="relative">
                                 <img src="{{ $product->quantity > 0
-                                    ? 'https://placehold.co/300x280/4ade80/ffffff?text=' . urlencode($product->name)
+                                    ? asset('/' . $product->image)
                                     : 'https://placehold.co/300x280/6b7280/ffffff?text=Hết+Hàng' }}"
                                     alt="{{ $product->name }}"
                                     class="w-full h-72 object-cover {{ $product->quantity <= 0 ? 'grayscale' : '' }}">
@@ -326,7 +309,7 @@
                             <div class="p-6 flex flex-col">
                                 <p
                                     class="{{ $product->quantity > 0 ? 'text-green-600' : 'text-gray-500' }} text-sm font-medium mb-2">
-                                    {{ $product->category->name }}
+                                    {{ $product->category->name ?? 'Khác' }}
                                 </p>
                                 <h5
                                     class="text-lg font-bold {{ $product->quantity > 0 ? 'text-gray-800' : 'text-gray-600' }} mb-3">
@@ -353,7 +336,7 @@
                         </div>
                     @empty
                         <div class="col-span-3 text-center text-gray-500 py-12">
-                            <div class="text-6xl mb-4">🔍</div>
+                     
                             <h3 class="text-xl font-semibold mb-2">Không tìm thấy sản phẩm nào</h3>
                             <p class="text-gray-400">
                                 @if (request('q'))

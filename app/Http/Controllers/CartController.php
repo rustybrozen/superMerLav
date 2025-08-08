@@ -59,6 +59,24 @@ class CartController extends Controller
 
 
 
+    public function buy(Request $request)
+{
+    $request->validate([
+        'product_id' => 'required|exists:products,id',
+        'quantity' => 'required|integer|min:1'
+    ]);
+
+    $productId = $request->input('product_id');
+    $quantity = $request->input('quantity');
+
+    $cart = $this->getOrCreateCart();
+    $cart->addItem($productId, $quantity);
+
+    return redirect()->route('cart')
+        ->with('success', 'Đã thêm sản phẩm vào giỏ hàng!');
+}
+
+
 
 
 
@@ -238,7 +256,7 @@ class CartController extends Controller
     public function updateGuestInfo(Request $request)
     {
 
-    
+
         $request->validate([
             'address' => 'required|string|max:500',
             'phone' => 'required|string|max:20',
@@ -246,7 +264,7 @@ class CartController extends Controller
             'fullname' => 'required|string|max:50'
         ]);
 
-  
+
         if (Auth::check()) {
             return response()->json([
                 'success' => false,

@@ -29,14 +29,14 @@ class AuthController extends Controller
 
 
 
-    
+
 
 
 
 
     public function register(Request $request)
     {
-        
+
         $validated = $request->validate([
             'username' => 'required|string|max:15|unique:users',
             'name' => 'required|string|max:50',
@@ -114,10 +114,10 @@ class AuthController extends Controller
                 }
                 $guestCart->clear();
             }
-            // Redirect based on user role
-            // if (Auth::user()->is_admin) {
-            //     return redirect()->route('admin.dashboard')->with('success', 'Chào mừng Admin! 👋');
-            // }
+
+            if (Auth::user()->is_admin) {
+                return redirect()->route('admin.dashboard')->with('success', 'Chào mừng Admin!');
+            }
             return redirect()->route('dashboard')->with('success', 'Đăng nhập thành công!');
         }
         throw ValidationException::withMessages([
