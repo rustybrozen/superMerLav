@@ -6,20 +6,21 @@
             <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
 
-                    {{-- Product Images Section --}}
+               
                     <div class="space-y-4">
                         <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden shadow-md">
-                            <img src="{{ asset($product->images->first()->image_path ?? 'default.jpg') }}"
+                            <img src="{{ asset('storage/'.$product->images->first()->image_path ?? 'default.jpg') }}"
+                             onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}';"
                                 alt="{{ $product->name }}"
                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                 id="mainProductImage">
                         </div>
 
-                        {{-- Image Gallery Thumbnails --}}
                         @if ($product->images->count() > 1)
                             <div class="flex space-x-3 overflow-x-auto pb-2">
                                 @foreach ($product->images as $image)
                                     <img src="{{ asset($image->image_path) }}" alt="{{ $product->name }}"
+                                     onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}';"
                                         class="w-16 h-16 rounded-lg object-cover cursor-pointer ring-2 ring-transparent hover:ring-green-300 opacity-75 hover:opacity-100 transition-all flex-shrink-0"
                                         onclick="changeMainImage('{{ asset($image->image_path) }}')">
                                 @endforeach

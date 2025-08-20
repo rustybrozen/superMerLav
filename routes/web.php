@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
@@ -52,6 +53,8 @@ Route::middleware(['isAdmin'])->group(function () {
 
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/tracking-order', [TrackingController::class, 'index'])->name('tracking');
+    Route::post('/tracking-order', [TrackingController::class, 'check'])->name('tracking.check');
   });
 
 

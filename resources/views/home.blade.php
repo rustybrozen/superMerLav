@@ -153,6 +153,7 @@
                             <div
                                 class="relative bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden h-48 transition duration-300 group-hover:shadow-md">
                                 <img src="{{ asset($categories[$i]->image) }}" alt="{{ $categories[$i]->name }}"
+                                onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}';">
                                     class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-transparent group-hover:bg-black/20 transition"></div>
                                 <div class="absolute inset-x-0 bottom-0 z-10 p-3">
@@ -202,16 +203,16 @@
     </section>
 
 
-  
+
     <section class="py-16 bg-gray-100">
         <div class="container mx-auto px-4">
             <div class="bg-white rounded-lg shadow-lg overflow-hidden flex items-center  h-[300px] mx-auto">
-          
+
                 <div class="w-2/3 h-full">
                     <img src="https://png.pngtree.com/png-clipart/20210815/original/pngtree-farm-organic-food-supermarket-promotion-banner-png-image_6639477.jpg"
                         class="w-full h-full object-cover" alt="Advertisement">
                 </div>
-              
+
                 <div class="p-6 w-1/3">
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Khuyến Mãi Đặc Biệt</h3>
                     <p class="text-gray-600 text-sm mb-3">Tận dụng ngay cơ hội để nhận ưu đãi cực lớn từ chúng tôi. Đừng
@@ -237,10 +238,13 @@
 
                 @forelse ($products as $product)
                     <div class="product-card bg-white rounded-lg shadow-md overflow-hidden">
-                        <img src="{{ asset($product->image) }}" class="w-full h-48 object-cover" alt="Cherry Tomatoes">
+                        <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-48 object-cover"
+                            alt="{{ $product->name }}"
+                            onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}';">
                         <div class="p-4">
                             <h5 class="text-lg font-semibold mb-2">{{ $product->name }}</h5>
-                            <p class="text-green-600 font-bold text-md mb-3">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
+                            <p class="text-green-600 font-bold text-md mb-3">
+                                {{ number_format($product->price, 0, ',', '.') }} ₫</p>
                             <a href="{{ route('detail', ['product' => $product->id]) }}" class="w-full">
                                 <button
                                     class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold transition duration-300">
@@ -253,7 +257,7 @@
                 @empty
                 @endforelse
 
-       
+
 
             </div>
 

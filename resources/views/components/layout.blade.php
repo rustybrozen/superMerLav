@@ -42,15 +42,7 @@
             </div>
         @endif
 
-        @if ($errors->any())
-            <div class="bg-red-50 text-red-700 px-4 py-2 rounded-md mb-3 border border-red-200">
-                <ul class="list-disc pl-5">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+   
 
         {{ $slot }}
     </main>

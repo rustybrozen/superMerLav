@@ -70,6 +70,7 @@
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     @if ($cat->image)
                                         <img src="{{ asset('storage/' . $cat->image) }}" alt="{{ $cat->name }}"
+                                         onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}';"
                                             class="h-12 w-12 object-cover rounded-lg border border-gray-200" />
                                     @else
                                         <span class="text-gray-400 italic">Không có</span>
@@ -83,13 +84,7 @@
                                         <input name="name" value="{{ old('name', $cat->name) }}"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                             required />
-                                        <div class="flex items-center gap-2">
-                                            <input id="is_active_{{ $cat->id }}" type="checkbox" name="is_active"
-                                                value="1" {{ $cat->is_active ? 'checked' : '' }}
-                                                class="rounded" />
-                                            <label for="is_active_{{ $cat->id }}" class="text-sm">Kích
-                                                hoạt</label>
-                                        </div>
+                              
                                         <div>
                                             <label class="block text-xs text-gray-600 mb-1">Thay hình ảnh (tùy
                                                 chọn)</label>

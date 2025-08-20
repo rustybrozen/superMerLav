@@ -3,10 +3,10 @@
         <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
             <div class="p-6 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <h1 class="text-2xl font-bold text-gray-900">
-                    <i class="fas fa-receipt mr-2 text-green-600"></i>Chi Tiết Đơn Hàng
+                  Chi Tiết Đơn Hàng
                 </h1>
                 <span class="text-sm text-gray-500">
-                    <i class="fas fa-clock mr-1"></i>
+                  
                     Cập nhật lúc {{ now()->format('H:i d/m/Y') }}
                 </span>
             </div>
@@ -93,7 +93,9 @@
                             @foreach ($order->orderDetails as $detail)
                                 <div class="px-6 py-4 grid grid-cols-12 gap-4 items-center text-sm">
                                     <div class="col-span-6 flex items-center gap-4">
-                                        <img src="{{ $detail->product && $detail->product->image ? asset('/' . $detail->product->image) : 'https://placehold.co/60x60' }}" class="w-16 h-16 object-cover rounded-lg">
+                                        <img src="{{ $detail->product && $detail->product->image ? asset('storage/' . $detail->product->image) : 'https://placehold.co/60x60' }}" 
+                                         onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}';"
+                                        class="w-16 h-16 object-cover rounded-lg">
                                         <div>
                                             <div class="font-medium text-gray-800">{{ $detail->product_name }}</div>
                                             @if ($detail->product && $detail->product->category)

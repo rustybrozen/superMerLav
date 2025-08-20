@@ -108,7 +108,8 @@
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-4 py-3">{{ $p->id }}</td>
                                 <td class="px-4 py-3">
-                                    <img src="{{ $p->image ? asset('storage/' . $p->image) : asset('assets/uploads/default.jpg') }}"
+                                    <img src="{{ $p->image ? asset('storage/' . $p->image) : asset('storage/default.jpg') }}"
+                                        onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}"
                                         class="h-12 w-12 object-cover rounded">
                                 </td>
                                 <td class="px-4 py-3 w-[320px]">
@@ -152,18 +153,15 @@
                                         </div>
                                         <div class="border border-gray-200 rounded p-2">
                                             <div class="text-xs font-semibold mb-1">Hình ảnh
-                                                ({{ $p->images->count() }}/5)</div>
+                                                ({{ $p->images->count() }}/5)
+                                            </div>
                                             <div class="flex flex-wrap gap-3">
                                                 @foreach ($p->images as $img)
                                                     <label class="inline-flex flex-col items-center gap-1 text-xs">
                                                         <img src="{{ asset('storage/' . $img->image_path) }}"
+                                                            onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}"
                                                             class="h-16 w-16 object-cover rounded">
-                                                        <span class="flex items-center gap-1">
-                                                            <input type="radio" name="primary_image_id"
-                                                                value="{{ $img->id }}"
-                                                                {{ $img->is_primary ? 'checked' : '' }}>
-                                                            <span>Chính</span>
-                                                        </span>
+
                                                         <span class="flex items-center gap-1">
                                                             <input type="checkbox" name="remove_image_ids[]"
                                                                 value="{{ $img->id }}">
@@ -179,7 +177,7 @@
                                         </div>
                                         <button
                                             class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs">Lưu</button>
-                                    
+
                                 </td>
                                 <td class="px-4 py-3">
                                     <select name="category_id"
@@ -193,7 +191,7 @@
                                         @endforeach
                                     </select>
                                 </td>
-</form>
+                                </form>
                                 <td class="px-4 py-3 whitespace-nowrap">{{ number_format($p->price) }}₫</td>
                                 <td class="px-4 py-3">{{ $p->quantity }}</td>
                                 <td class="px-4 py-3">

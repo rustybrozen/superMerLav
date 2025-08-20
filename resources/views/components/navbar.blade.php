@@ -9,7 +9,7 @@
                 <span>Fresh Mart</span>
             </a>
 
-            
+
             <div class="hidden lg:flex items-center space-x-8">
                 <ul class="flex items-center space-x-6 text-white font-medium">
                     <li>
@@ -18,7 +18,7 @@
                             Trang Chủ
                         </a>
                     </li>
-                   
+
                     <li>
                         <a href="{{ route('shop') }}"
                             class="hover:text-green-200 transition-colors py-2 px-1 border-b-2 border-transparent hover:border-green-200">
@@ -37,6 +37,15 @@
                             Liên Hệ
                         </a>
                     </li>
+                    @guest
+                        <li>
+                            <a href="{{ route('tracking') }}"
+                                class="hover:text-green-200 transition-colors py-2 px-1 border-b-2 border-transparent hover:border-green-200">
+                                Đơn Hàng
+                            </a>
+                        </li>
+                    @endguest
+
                 </ul>
 
                 <!-- Right section -->
@@ -44,7 +53,7 @@
                     @auth
                         <!-- If user is logged in -->
                         <div class="flex items-center space-x-3">
-                            <!-- User greeting with dropdown -->
+                     
                             <div class="relative group">
                                 <button
                                     class="bg-green-800 hover:bg-green-900 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200 shadow-sm">
@@ -64,39 +73,39 @@
                                     <li>
                                         <a href="{{ route('dashboard') }}"
                                             class="px-5 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3">
-                                            <i class="fas fa-tachometer-alt text-blue-500"></i>
+                                       
                                             <span>Bảng điều khiển</span>
                                         </a>
                                     </li>
 
-                                
+
                                     <li>
                                         <a href="{{ route('profile.show') }}"
                                             class="px-5 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3">
-                                            <i class="fas fa-user-edit text-green-600"></i>
+                                           
                                             <span>Cập nhật thông tin</span>
                                         </a>
                                     </li>
 
-                                 
+
                                     <li>
                                         <a href="{{ route('order.all') }}"
                                             class="px-5 py-3 hover:bg-gray-50 transition-colors flex items-center gap-3">
-                                            <i class="fas fa-shopping-bag text-emerald-500"></i>
+                                           
                                             <span>Đơn hàng của tôi</span>
                                         </a>
                                     </li>
 
-                                 
-                                    @if (Auth::user()->is_admin)
+
+                                    {{-- @if (Auth::user()->is_admin)
                                         <li class="border-t border-gray-100">
                                             <a href="#"
                                                 class="px-5 py-3 hover:bg-gray-100 transition-colors flex items-center gap-3 text-red-600">
-                                                <i class="fas fa-cogs"></i>
+                                              
                                                 <span>Trang quản trị</span>
                                             </a>
                                         </li>
-                                    @endif
+                                    @endif --}}
 
                                     <!-- Đăng xuất -->
                                     <li class="border-t border-gray-100">
@@ -104,7 +113,7 @@
                                             @csrf
                                             <button type="submit"
                                                 class="w-full text-left px-5 py-3 hover:bg-red-50 transition-colors flex items-center gap-3 text-red-600">
-                                                <i class="fas fa-sign-out-alt"></i>
+                                            
                                                 <span>Đăng xuất</span>
                                             </button>
                                         </form>
@@ -124,7 +133,7 @@
                                 <i class="fas fa-user text-sm"></i>
                                 <span>Đăng Nhập</span>
                             </a>
-    
+
                         </div>
                     @endauth
                     <!-- Shopping cart -->

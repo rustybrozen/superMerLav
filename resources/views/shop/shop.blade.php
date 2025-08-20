@@ -157,7 +157,8 @@
                                             ]),
                                         ) }}"
                                             class="flex items-center p-3 {{ $isActive ? 'text-white' : 'text-green-700 group-hover:text-green-800' }}">
-                                            <img src="{{ asset('/' . $category->image) }}"
+                                            <img src="{{ asset('storage/' . $category->image) }}"
+                                             onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}';"
                                                 alt="{{ $category->name }}" class="w-8 h-8 rounded mr-3">
                                             <span class="font-medium flex-1">{{ $category->name }}</span>
                                             <span class="text-xs opacity-75">({{ $productCount }})</span>
@@ -294,9 +295,11 @@
                             class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 {{ $product->quantity <= 0 ? 'opacity-75' : '' }}">
                             <div class="relative">
                                 <img src="{{ $product->quantity > 0
-                                    ? asset('/' . $product->image)
+                                    ? asset('storage/' . $product->image)
                                     : 'https://placehold.co/300x280/6b7280/ffffff?text=Hết+Hàng' }}"
+                                    onerror="this.onerror=null;this.src='{{ asset('storage/' . 'default.jpg') }}';"
                                     alt="{{ $product->name }}"
+                                    
                                     class="w-full h-72 object-cover {{ $product->quantity <= 0 ? 'grayscale' : '' }}">
 
                                 @if ($product->quantity <= 0)
