@@ -110,9 +110,6 @@ The database schema is defined by the migration files in the `database/migration
 - `vouchers`
 - `product_reviews`
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a pull request or open an issue for any bugs or feature requests.
 
 ## License
 
